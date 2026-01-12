@@ -1,40 +1,30 @@
-# Collateral Vault Management System
+# 🛡️ Non-Custodial Collateral Vault (Solana/Anchor)
 
-**Role:** Solana/Rust Developer
-**Submission Type:** Technical Assessment
-**Network:** Solana Devnet
+A secure, non-custodial DeFi primitive built on **Solana** using the **Anchor Framework**. This protocol allows users to deposit assets into isolated vaults managed by PDAs, ensuring fund safety and strictly enforced logic.
 
-## 1. System Architecture
-The Collateral Vault is a non-custodial smart contract designed to manage user collateral for a Perpetual DEX.
+## 🚀 Key Features
 
-### 1.1 Core Components
-* **Vault PDA (`vault` + `vault_id`):** A unique, program-derived account for each user that stores balance state (`available` vs `locked`).
-* **Vault Token Account (`token_account`):** An SPL Token Account owned by the Vault PDA. This ensures that **only the program** can withdraw or move funds (via CPI), eliminating custodial risk.
+* **Program Derived Addresses (PDAs):** Uses deterministic PDAs to create isolated vaults for each user, preventing address collisions.
+* **Cross-Program Invocations (CPI):** Integrates with the **SPL Token Program** to handle secure transfers of collateral (deposits/withdrawals) directly on-chain.
+* **Math Overflow Protection:** Implements SafeMath checks to prevent integer overflow/underflow attacks during balance updates.
+* **Access Control:** Strict checks (`Signer` verification) to ensure only the vault owner can initiate withdrawals.
 
-### 1.2 Security Mechanisms
-1.  **PDA Ownership:** The Vault Token Account is owned by the Vault PDA, not the user's private key.
-2.  **CPI Signers:** Withdrawals (or locking) require the program to sign using `CpiContext::new_with_signer` and the specific PDA seeds.
-3.  **Seed Constraints:** Anchor constraints (`seeds = [...]`) are enforced on every instruction to prevent account spoofing.
-4.  **Math Safety:** Rust's `checked_add` and `checked_sub` are used for all balance operations to prevent overflow attacks.
+## 🛠️ Tech Stack
 
-## 2. API / Instruction Reference
+* **Language:** Rust
+* **Framework:** Anchor
+* **Network:** Solana Devnet
+* **Testing:** TypeScript (Mocha/Chai)
 
-### `initialize_vault`
-* **Input:** `vault_id` (u8) for idempotency.
-* **Action:** Derives PDAs, calculates rent, and initializes the `CollateralVault` struct on-chain.
+## 🧪 Testing & Verification
 
-### `deposit`
-* **Input:** `vault_id` (u8), `amount` (u64).
-* **Action:** Executes a **Cross-Program Invocation (CPI)** to the SPL Token Program (`transfer` instruction). Moves USDT from User ATA -> Vault ATA. Updates `total_balance` and `available_balance`.
+The protocol includes a comprehensive test suite validating the entire lifecycle:
+1.  ✅ **Vault Initialization:** Verifies PDA creation and account allocation.
+2.  ✅ **Deposit Logic:** Checks token transfer from User Wallet -> Vault PDA.
+3.  ✅ **Withdrawal Logic:** Checks token transfer from Vault PDA -> User Wallet.
+4.  ✅ **Security:** Verifies that unauthorized users *cannot* withdraw funds.
 
-### `lock_collateral`
-* **Input:** `vault_id` (u8), `amount` (u64).
-* **Action:** Internal accounting update. Decreases `available_balance` and increases `locked_balance`. Validates that `available_balance >= amount` before locking.
+## 👨‍💻 Author
 
-## 3. Setup & Testing
-The project was built and tested using **Solana Playground** (Anchor 0.29+).
-
-**Running Tests:**
-```bash
-anchor build
-anchor test
+**Kaustubh Dhage**
+*Blockchain Engineer | Rust & Flutter Developer*
